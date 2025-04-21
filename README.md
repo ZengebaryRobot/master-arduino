@@ -1,9 +1,5 @@
 # 🛰️ Zengebary Master
 
-This document explains **how to communicate** with the Master Arduino using **I2C**.
-
----
-
 ## 📡 Master Arduino I2C Address: 0x10
 
 ## 📜 Command Types
@@ -42,7 +38,6 @@ When sending a command:
 -   **Purpose**: Ask ESP32-CAM to detect an object or feature.
 -   **Arguments**:
     -   A string (ASCII characters).
-    -   **No length byte is sent** — just the text itself.
 -   **Response**:
     -   Comma-separated integers (e.g., `"23,88,105"`)  
         OR
