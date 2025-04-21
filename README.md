@@ -90,7 +90,7 @@ When sending a command:
 
 -   **Purpose**: Move the robotic arm.
 -   **Arguments**:
-    -   5 bytes: Base, Shoulder, Elbow, Wrist, Grip angles (0–255).
+    -   5 bytes: Base, Shoulder, Elbow, Wrist, Grip angles (0–180).
 -   **Response**:
     -   `"OK"` if 5 values received
     -   `"ERROR"` if not
