@@ -15,7 +15,7 @@ private:
   AltSoftSerial *serial;
   Status status;
   unsigned long requestTime;
-  const unsigned long TIMEOUT_MS = 3000;
+  const unsigned long TIMEOUT_MS = 5000;
   char buffer[256];
   int bufferIndex;
   int values[20]; // i assume max val is 20
