@@ -69,14 +69,17 @@ void requestEvent()
 {
   if (readyToReply)
   {
+
+    Wire.write(responseLen);
     Wire.write((uint8_t *)responseBuf, responseLen);
     readyToReply = false;
   }
   else
   {
-    Wire.write((uint8_t *)"", 0);
+    Wire.write((uint8_t)0);
   }
 }
+
 
 void showOnDisplay(const String &txt)
 {
