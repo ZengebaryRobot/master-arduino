@@ -85,23 +85,16 @@ void showOnDisplay(const String &txt)
   Serial.print("Displaying: ");
   Serial.println(txt);
 
-  Serial.print("Length: ");
-  Serial.println(txt.length());
-
   lcd.clear();
-  delay(5); // Give the LCD time to process the clear command
-  
+  delay(50);
+
   if (txt.length() > 16)
   {
     lcd.setCursor(0, 0);
     lcd.print(txt.substring(0, 16));
+
     lcd.setCursor(0, 1);
-    // Make sure we don't print more than 16 chars on second line
-    if (txt.length() > 32) {
-      lcd.print(txt.substring(16, 32));
-    } else {
-      lcd.print(txt.substring(16));
-    }
+    lcd.print(txt.length() > 32 ? txt.substring(16, 32) : txt.substring(16));
   }
   else
   {
@@ -112,7 +105,16 @@ void showOnDisplay(const String &txt)
 
 void moveArmTo(int base, int shoulder, int elbow, int wrist, int grip)
 {
-  //
+  Serial.print("Moving arm to: ");
+  Serial.print(base);
+  Serial.print(", ");
+  Serial.print(shoulder);
+  Serial.print(", ");
+  Serial.print(elbow);
+  Serial.print(", ");
+  Serial.print(wrist);
+  Serial.print(", ");
+  Serial.println(grip);
 }
 
 void setup()
@@ -140,8 +142,6 @@ void setup()
 void loop()
 {
   camClient.update();
-
-  
 
   if (newCommand)
   {
