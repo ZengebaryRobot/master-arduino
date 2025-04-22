@@ -85,7 +85,7 @@ void showOnDisplay(const String &txt)
   Serial.println(txt);
 
   lcd.clear();
-  delay(100);
+  delay(200);
 
   lcd.setCursor(0, 0);
 
