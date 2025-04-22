@@ -80,16 +80,28 @@ void requestEvent()
   }
 }
 
-
 void showOnDisplay(const String &txt)
 {
+  Serial.print("Displaying: ");
+  Serial.println(txt);
+
+  Serial.print("Length: ");
+  Serial.println(txt.length());
+
   lcd.clear();
+  delay(5); // Give the LCD time to process the clear command
+  
   if (txt.length() > 16)
   {
     lcd.setCursor(0, 0);
     lcd.print(txt.substring(0, 16));
     lcd.setCursor(0, 1);
-    lcd.print(txt.substring(16));
+    // Make sure we don't print more than 16 chars on second line
+    if (txt.length() > 32) {
+      lcd.print(txt.substring(16, 32));
+    } else {
+      lcd.print(txt.substring(16));
+    }
   }
   else
   {
@@ -128,6 +140,8 @@ void setup()
 void loop()
 {
   camClient.update();
+
+  
 
   if (newCommand)
   {
