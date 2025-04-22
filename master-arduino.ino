@@ -5,6 +5,7 @@
 
 #define I2C_ADDRESS_MASTER 0x10
 #define I2C_ADDRESS_LCD 0x27
+#define TEXT_ARG_SIZE 64
 
 enum
 {
@@ -20,7 +21,9 @@ volatile bool newCommand = false;
 volatile uint8_t commandType = 0;
 volatile int intArgs[6];
 volatile uint8_t intArgCount = 0;
-String textArg = "";
+
+volatile char textArgBuf[TEXT_ARG_SIZE];
+volatile uint8_t textArgLen = 0;
 
 // Response buffer
 char responseBuf[128];
@@ -37,23 +40,20 @@ void receiveEvent(int howMany)
 
   commandType = Wire.read();
   intArgCount = 0;
-  textArg = "";
+  textArgLen = 0;
 
   switch (commandType)
   {
   case CMD_CAMERA:
   case CMD_DISPLAY:
-    while (Wire.available())
-    {
-      textArg += char(Wire.read());
-    }
+    while (Wire.available() && textArgLen < TEXT_ARG_SIZE - 1)
+      textArgBuf[textArgLen++] = Wire.read();
+    textArgBuf[textArgLen] = '\0';
     break;
 
   case CMD_MOVE_ARM:
     while (Wire.available() && intArgCount < 6)
-    {
       intArgs[intArgCount++] = Wire.read();
-    }
     break;
 
   default:
@@ -69,7 +69,6 @@ void requestEvent()
 {
   if (readyToReply)
   {
-
     Wire.write(responseLen);
     Wire.write((uint8_t *)responseBuf, responseLen);
     readyToReply = false;
@@ -86,11 +85,12 @@ void showOnDisplay(const String &txt)
   Serial.println(txt);
 
   lcd.clear();
-  delay(50);
+  delay(100);
+
+  lcd.setCursor(0, 0);
 
   if (txt.length() > 16)
   {
-    lcd.setCursor(0, 0);
     lcd.print(txt.substring(0, 16));
 
     lcd.setCursor(0, 1);
@@ -98,7 +98,6 @@ void showOnDisplay(const String &txt)
   }
   else
   {
-    lcd.setCursor(0, 0);
     lcd.print(txt);
   }
 }
@@ -147,6 +146,8 @@ void loop()
   {
     newCommand = false;
     responseLen = 0;
+
+    String textArg = String((char *)textArgBuf);
 
     switch (commandType)
     {
