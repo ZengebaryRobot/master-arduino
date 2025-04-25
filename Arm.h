@@ -20,22 +20,18 @@ private:
   // Current angles
   int state_angle_base, state_angle_shoulder, state_angle_elbow, state_angle_wrist, state_angle_grip;
 
-  void rest_and_print()
+  void printMessage(const char *msg, bool newLine = false)
   {
-    printMenu();
-    delay(500);
-  }
-
-public:
-  Arm(NeoSWSerial *serial)
-  {
-    state_angle_base = DEFAULT_ANGLE_BASE;
-    state_angle_shoulder = DEFAULT_ANGLE_SHOULDER;
-    state_angle_elbow = DEFAULT_ANGLE_ELBOW;
-    state_angle_wrist = DEFAULT_ANGLE_WRIST;
-    state_angle_grip = DEFAULT_ANGLE_GRIP;
-
-    debugSerial = serial;
+#if ENABLE_DEBUG
+    if (newLine)
+    {
+      debugSerial->println(msg);
+    }
+    else
+    {
+      debugSerial->print(msg);
+    }
+#endif
   }
 
   void printMenu()
@@ -51,7 +47,6 @@ public:
     debugSerial->println(state_angle_wrist);
     debugSerial->print("G: ");
     debugSerial->println(state_angle_grip);
-    debugSerial->println();
 #endif
   }
 
@@ -62,6 +57,26 @@ public:
     servoElbow.attach(SERVO_PIN_ELBOW);
     servoWrist.attach(SERVO_PIN_WRIST, 500, 2400);
     servoGrip.attach(SERVO_PIN_GRIP, 500, 2400); // 1000 - 2000 ?? REVIEW
+  }
+public:
+  Arm(NeoSWSerial *serial)
+  {
+    state_angle_base = DEFAULT_ANGLE_BASE;
+    state_angle_shoulder = DEFAULT_ANGLE_SHOULDER;
+    state_angle_elbow = DEFAULT_ANGLE_ELBOW;
+    state_angle_wrist = DEFAULT_ANGLE_WRIST;
+    state_angle_grip = DEFAULT_ANGLE_GRIP;
+
+    debugSerial = serial;
+  }
+
+  void initializeArm()
+  {
+    attachAll();
+
+    printMessage("Arm Motors intialized", true);
+    printMenu();
+    delay(500);
   }
 
   void moveServo(ArmMotor motor, int requiredAngle, int overShoot)
@@ -113,11 +128,9 @@ public:
 
     if (requiredAngle == *stateAngle)
     {
-#if ENABLE_DEBUG
-      debugSerial->print(motorName);
-      debugSerial->print(" is already on angle: ");
-      debugSerial->println(requiredAngle);
-#endif
+      printMessage(motorName);
+      printMessage(" is already on angle: ");
+      printMessage(requiredAngle, true);
       return;
     }
 
@@ -149,27 +162,15 @@ public:
     // Update state and print if angle changed
     *stateAngle = requiredAngle;
 
-#if ENABLE_DEBUG
-    debugSerial->print("Moved ");
-    debugSerial->println(motorName);
-#endif
+    printMessage("Moved: ");
+    printMessage(motorName, true);
 
-    rest_and_print();
+    printMenu();
+    delay(500);
   }
 
   void moveArmTo(int base, int shoulder, int elbow, int wrist, int grip)
   {
-#if ENABLE_DEBUG
-    debugSerial->print("Moving arm to: ");
-    debugSerial->print(base);
-    debugSerial->print(", ");
-    debugSerial->print(shoulder);
-    debugSerial->print(", ");
-    debugSerial->print(elbow);
-    debugSerial->print(", ");
-    debugSerial->print(wrist);
-    debugSerial->print(", ");
-    debugSerial->println(grip);
-#endif
+    // to be implemented
   }
 };
