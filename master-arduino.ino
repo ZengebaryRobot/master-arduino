@@ -2,6 +2,7 @@
 #include <AltSoftSerial.h>
 #include "Client.h"
 #include <LiquidCrystal_I2C.h>
+#include "Arm.h"
 
 #define I2C_ADDRESS_MASTER 0x10
 #define I2C_ADDRESS_LCD 0x27
@@ -11,11 +12,13 @@ enum
 {
   CMD_CAMERA = 1,
   CMD_DISPLAY = 2,
-  CMD_MOVE_ARM = 3
+  CMD_MOVE_ARM = 3,
+  CMD_MOVE_ARM_JOINT = 4
 };
 
 AltSoftSerial espSerial; // 8 (RX) & 9 (TX)
 Client camClient(&espSerial);
+Arm arm;
 
 volatile bool newCommand = false;
 volatile uint8_t commandType = 0;
@@ -53,6 +56,11 @@ void receiveEvent(int howMany)
 
   case CMD_MOVE_ARM:
     while (Wire.available() && intArgCount < 6)
+      intArgs[intArgCount++] = Wire.read();
+    break;
+
+  case CMD_MOVE_ARM_JOINT:
+    while (Wire.available() && intArgCount < 3)
       intArgs[intArgCount++] = Wire.read();
     break;
 
@@ -130,6 +138,10 @@ void setup()
   camClient.begin(9600);
   delay(200);
 
+  arm.attachAll();
+  arm.printMenu();
+  delay(500);
+
   Wire.begin(I2C_ADDRESS_MASTER);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
@@ -186,6 +198,21 @@ void loop()
       if (intArgCount == 5)
       {
         moveArmTo(intArgs[0], intArgs[1], intArgs[2], intArgs[3], intArgs[4]);
+        responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
+      }
+      else
+      {
+        responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
+      }
+      break;
+
+    case CMD_MOVE_ARM_JOINT:
+      if (intArgCount == 3)
+      {
+        char motor = (char)intArgs[0];
+        int requiredAngle = intArgs[1];
+        int overShoot = intArgs[2];
+        arm.moveServo(motor, requiredAngle, overShoot);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
       }
       else
