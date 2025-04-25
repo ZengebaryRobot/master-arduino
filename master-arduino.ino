@@ -137,10 +137,6 @@ void setup()
   camClient.begin(115200);
   delay(200);
 
-  arm.attachAll();
-  arm.printMenu();
-  delay(500);
-
   Wire.begin(I2C_ADDRESS_MASTER);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
@@ -150,6 +146,8 @@ void setup()
 #if ENABLE_DEBUG
   debugSerial.println("Master ready");
 #endif
+
+  arm.initializeArm();
 }
 
 void loop()
