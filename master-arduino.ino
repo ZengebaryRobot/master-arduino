@@ -14,7 +14,7 @@ enum
 };
 
 #if ENABLE_DEBUG
-NeoSWSerial debugSerial(8, 9); // 8 (RX) & 9 (TX)
+NeoSWSerial debugSerial(10, 11); // 10 (RX) & 11 (TX)
 #endif
 
 #if ENABLE_DEBUG
