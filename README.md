@@ -117,8 +117,8 @@ When sending a command:
 -   **Purpose**: Move a single joint of the robotic arm.
 -   **Arguments**:
     -   3 bytes:
-        -   Joint character ('b'=base, 's'=shoulder, 'e'=elbow, 'w'=wrist, 'g'=grip)
-        -   Required angle (10-170)
+        -   Joint ID (0=base, 1=shoulder, 2=elbow, 3=wrist, 4=grip)
+        -   Required angle (0-180)
         -   Overshoot value (helps overcome friction)
 -   **Response**:
     -   `"OK"` if 3 values received
@@ -129,10 +129,10 @@ When sending a command:
 **Write**:
 
 ```
-[ 4 ][ 'b' ][ 90 ][ 5 ]
+[ 4 ][ 0 ][ 90 ][ 5 ]
 ```
 
-(Move base to 90° with 5° overshoot)
+(Move base(0) to 90° with 5° overshoot)
 
 **Then Read**:
 
@@ -288,14 +288,14 @@ void setup() {
   Serial.begin(9600);
   delay(1000);
 
-  moveJoint('b', 90, 5);  // Move base to 90° with 5° overshoot
+  moveJoint(0, 90, 5);  // Move base (0) to 90° with 5° overshoot
 }
 
 void loop() {
   //
 }
 
-void moveJoint(char joint, uint8_t angle, uint8_t overshoot) {
+void moveJoint(uint8_t joint, uint8_t angle, uint8_t overshoot) {
   Wire.beginTransmission(MASTER_ADDR);
   Wire.write(4);
   Wire.write(joint);
@@ -323,4 +323,4 @@ void moveJoint(char joint, uint8_t angle, uint8_t overshoot) {
 | Camera         | `[1] [ASCII chars]`                            | CSV / ERROR |
 | Display        | `[2] [ASCII chars] (max 32)`                   | OK / ERROR  |
 | Move Arm       | `[3] [base] [shoulder] [elbow] [wrist] [grip]` | OK / ERROR  |
-| Move Arm Joint | `[4] [joint char] [angle] [overshoot]`         | OK / ERROR  |
+| Move Arm Joint | `[4] [joint ID] [angle] [overshoot]`           | OK / ERROR  |

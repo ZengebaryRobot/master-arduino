@@ -211,10 +211,7 @@ void loop()
     case CMD_MOVE_ARM_JOINT:
       if (intArgCount == 3)
       {
-        char motor = (char)intArgs[0];
-        int requiredAngle = intArgs[1];
-        int overShoot = intArgs[2];
-        arm.moveServo(motor, requiredAngle, overShoot);
+        arm.moveServo(intArgs[0], intArgs[1], intArgs[2]);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
       }
       else

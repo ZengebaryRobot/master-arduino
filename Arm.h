@@ -2,6 +2,15 @@
 #include <NeoSWSerial.h>
 #include "DEFs.h"
 
+enum ArmMotor
+{
+  BASE = 0,
+  SHOULDER = 1,
+  ELBOW = 2,
+  WRIST = 3,
+  GRIP = 4
+};
+
 class Arm
 {
 private:
@@ -55,7 +64,7 @@ public:
     servoGrip.attach(SERVO_PIN_GRIP, 500, 2400); // 1000 - 2000 ?? REVIEW
   }
 
-  void moveServo(char motor, int requiredAngle, int overShoot)
+  void moveServo(ArmMotor motor, int requiredAngle, int overShoot)
   {
     // Clamp angle to safe range
     requiredAngle = constrain(requiredAngle, 10, 170);
@@ -63,46 +72,46 @@ public:
     // Motor-specific settings
     int baseDelay = 40, slowDelay = 80, threshold = 0;
     const char *motorName = "";
-    Servo s;
-    int stateAngle;
+    Servo *s = nullptr;
+    int *stateAngle = nullptr;
 
     switch (motor)
     {
-    case 'b':
+    case BASE:
       threshold = 20;
       motorName = "base";
-      s = servoBase;
-      stateAngle = state_angle_base;
+      s = &servoBase;
+      stateAngle = &state_angle_base;
       break;
-    case 's':
+    case SHOULDER:
       threshold = 0;
       motorName = "shoulder";
-      s = servoShoulder;
-      stateAngle = state_angle_shoulder;
+      s = &servoShoulder;
+      stateAngle = &state_angle_shoulder;
       break;
-    case 'e':
+    case ELBOW:
       threshold = 5;
       motorName = "elbow";
-      s = servoElbow;
-      stateAngle = state_angle_elbow;
+      s = &servoElbow;
+      stateAngle = &state_angle_elbow;
       break;
-    case 'w':
+    case WRIST:
       threshold = 0;
       motorName = "wrist";
-      s = servoWrist;
-      stateAngle = state_angle_wrist;
+      s = &servoWrist;
+      stateAngle = &state_angle_wrist;
       break;
-    case 'g':
+    case GRIP:
       threshold = 0;
       motorName = "grip";
-      s = servoGrip;
-      stateAngle = state_angle_grip;
+      s = &servoGrip;
+      stateAngle = &state_angle_grip;
       break;
     default:
       return;
     }
 
-    if (requiredAngle == stateAngle)
+    if (requiredAngle == *stateAngle)
     {
 #if ENABLE_DEBUG
       debugSerial->print(motorName);
@@ -113,12 +122,12 @@ public:
     }
 
     // Move to target angle
-    int step = (requiredAngle > stateAngle) ? 1 : -1;
-    for (int i = stateAngle; i != requiredAngle + step; i += step)
+    int step = (requiredAngle > *stateAngle) ? 1 : -1;
+    for (int i = *stateAngle; i != requiredAngle + step; i += step)
     {
       int remaining = abs(requiredAngle - i);
       int delayMs = (remaining > threshold) ? baseDelay : slowDelay;
-      s.write(i);
+      s->write(i);
       delay(delayMs);
     }
 
@@ -127,37 +136,18 @@ public:
     {
       for (int i = requiredAngle; i <= requiredAngle + overShoot; i++)
       {
-        s.write(i);
+        s->write(i);
         delay(baseDelay);
       }
       for (int i = requiredAngle + overShoot; i >= requiredAngle; i--)
       {
-        s.write(i);
+        s->write(i);
         delay(baseDelay);
       }
     }
 
     // Update state and print if angle changed
-    switch (motor)
-    {
-    case 'b':
-      state_angle_base = requiredAngle;
-      break;
-    case 's':
-      state_angle_shoulder = requiredAngle;
-      break;
-    case 'e':
-      state_angle_elbow = requiredAngle;
-      break;
-    case 'w':
-      state_angle_wrist = requiredAngle;
-      break;
-    case 'g':
-      state_angle_grip = requiredAngle;
-      break;
-    default:
-      return;
-    }
+    *stateAngle = requiredAngle;
 
 #if ENABLE_DEBUG
     debugSerial->print("Moved ");
