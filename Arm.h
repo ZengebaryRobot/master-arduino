@@ -166,4 +166,20 @@ public:
 
     rest_and_print();
   }
+
+  void moveArmTo(int base, int shoulder, int elbow, int wrist, int grip)
+  {
+#if ENABLE_DEBUG
+    debugSerial->print("Moving arm to: ");
+    debugSerial->print(base);
+    debugSerial->print(", ");
+    debugSerial->print(shoulder);
+    debugSerial->print(", ");
+    debugSerial->print(elbow);
+    debugSerial->print(", ");
+    debugSerial->print(wrist);
+    debugSerial->print(", ");
+    debugSerial->println(grip);
+#endif
+  }
 };

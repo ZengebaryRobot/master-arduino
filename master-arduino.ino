@@ -121,22 +121,6 @@ void showOnDisplay(const String &txt)
   }
 }
 
-void moveArmTo(int base, int shoulder, int elbow, int wrist, int grip)
-{
-#if ENABLE_DEBUG
-  debugSerial.print("Moving arm to: ");
-  debugSerial.print(base);
-  debugSerial.print(", ");
-  debugSerial.print(shoulder);
-  debugSerial.print(", ");
-  debugSerial.print(elbow);
-  debugSerial.print(", ");
-  debugSerial.print(wrist);
-  debugSerial.print(", ");
-  debugSerial.println(grip);
-#endif
-}
-
 void setup()
 {
   // LCD init
@@ -215,7 +199,7 @@ void loop()
     case CMD_MOVE_ARM:
       if (intArgCount == 5)
       {
-        moveArmTo(intArgs[0], intArgs[1], intArgs[2], intArgs[3], intArgs[4]);
+        arm.moveArmTo(intArgs[0], intArgs[1], intArgs[2], intArgs[3], intArgs[4]);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
       }
       else
