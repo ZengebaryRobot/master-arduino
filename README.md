@@ -9,11 +9,12 @@ When sending a command:
 1. First byte = **Command Type**
 2. Followed by **Command-Specific Arguments**
 
-| Command        | Code (`uint8_t`) | Purpose                            |
-| -------------- | ---------------- | ---------------------------------- |
-| `CMD_CAMERA`   | `1`              | Request vision data from ESP32-CAM |
-| `CMD_DISPLAY`  | `2`              | Display a short text on LCD        |
-| `CMD_MOVE_ARM` | `3`              | Move the robotic arm               |
+| Command              | Code (`uint8_t`) | Purpose                            |
+| -------------------- | ---------------- | ---------------------------------- |
+| `CMD_CAMERA`         | `1`              | Request vision data from ESP32-CAM |
+| `CMD_DISPLAY`        | `2`              | Display a short text on LCD        |
+| `CMD_MOVE_ARM`       | `3`              | Move the robotic arm               |
+| `CMD_MOVE_ARM_JOINT` | `4`              | Move a specific arm joint          |
 
 ---
 
@@ -102,6 +103,36 @@ When sending a command:
 ```
 [ 3 ][ 90 ][ 45 ][ 120 ][ 60 ][ 10 ]
 ```
+
+**Then Read**:
+
+```
+"OK" or "ERROR"
+```
+
+---
+
+### 🦾 4. CMD_MOVE_ARM_JOINT (Move Specific Joint)
+
+-   **Purpose**: Move a single joint of the robotic arm.
+-   **Arguments**:
+    -   3 bytes:
+        -   Joint character ('b'=base, 's'=shoulder, 'e'=elbow, 'w'=wrist, 'g'=grip)
+        -   Required angle (10-170)
+        -   Overshoot value (helps overcome friction)
+-   **Response**:
+    -   `"OK"` if 3 values received
+    -   `"ERROR"` if not
+
+#### Example
+
+**Write**:
+
+```
+[ 4 ][ 'b' ][ 90 ][ 5 ]
+```
+
+(Move base to 90° with 5° overshoot)
 
 **Then Read**:
 
@@ -243,10 +274,53 @@ void moveArm(uint8_t base, uint8_t shoulder, uint8_t elbow, uint8_t wrist, uint8
 }
 ```
 
+---
+
+### 🦾 Example 4 — Move a Single Joint
+
+```cpp
+#include <Wire.h>
+
+#define MASTER_ADDR 0x10
+
+void setup() {
+  Wire.begin();
+  Serial.begin(9600);
+  delay(1000);
+
+  moveJoint('b', 90, 5);  // Move base to 90° with 5° overshoot
+}
+
+void loop() {
+  //
+}
+
+void moveJoint(char joint, uint8_t angle, uint8_t overshoot) {
+  Wire.beginTransmission(MASTER_ADDR);
+  Wire.write(4);
+  Wire.write(joint);
+  Wire.write(angle);
+  Wire.write(overshoot);
+  Wire.endTransmission();
+
+  delay(20);
+
+  Wire.requestFrom(MASTER_ADDR, 32);
+
+  String response = "";
+  while (Wire.available()) {
+    response += (char)Wire.read();
+  }
+
+  Serial.println("Response: " + response);
+}
+```
+
 # 🛡️ Summary Table
 
-| Command  | Format                                         | Response    |
-| -------- | ---------------------------------------------- | ----------- |
-| Camera   | `[1] [ASCII chars]`                            | CSV / ERROR |
-| Display  | `[2] [ASCII chars] (max 32)`                   | OK / ERROR  |
-| Move Arm | `[3] [base] [shoulder] [elbow] [wrist] [grip]` | OK / ERROR  |
+| Command        | Format                                         | Response    |
+| -------------- | ---------------------------------------------- | ----------- |
+| Camera         | `[1] [ASCII chars]`                            | CSV / ERROR |
+| Display        | `[2] [ASCII chars] (max 32)`                   | OK / ERROR  |
+| Move Arm       | `[3] [base] [shoulder] [elbow] [wrist] [grip]` | OK / ERROR  |
+| Move Arm Joint | `[4] [joint char] [angle] [overshoot]`         | OK / ERROR  |
