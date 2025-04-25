@@ -1,4 +1,5 @@
 #include <Servo.h>
+#include <NeoSWSerial.h>
 
 // === Servo Pins ===
 #define SERVO_PIN_BASE 10    // Base
@@ -19,8 +20,8 @@
 
 class Arm
 {
-
 private:
+  NeoSWSerial *debugSerial;
   Servo servoBase, servoShoulder, servoElbow, servoWrist, servoGrip;
 
   // Current angles
@@ -33,28 +34,30 @@ private:
   }
 
 public:
-  Arm()
+  Arm(NeoSWSerial *serial)
   {
     state_angle_base = DEFAULT_ANGLE_BASE;
     state_angle_shoulder = DEFAULT_ANGLE_SHOULDER;
     state_angle_elbow = DEFAULT_ANGLE_ELBOW;
     state_angle_wrist = DEFAULT_ANGLE_WRIST;
     state_angle_grip = DEFAULT_ANGLE_GRIP;
+
+    debugSerial = serial;
   }
 
   void printMenu()
   {
-    Serial.print("B: ");
-    Serial.println(state_angle_base);
-    Serial.print("S: ");
-    Serial.println(state_angle_shoulder);
-    Serial.print("E: ");
-    Serial.println(state_angle_elbow);
-    Serial.print("W: ");
-    Serial.println(state_angle_wrist);
-    Serial.print("G: ");
-    Serial.println(state_angle_grip);
-    Serial.println();
+    debugSerial->print("B: ");
+    debugSerial->println(state_angle_base);
+    debugSerial->print("S: ");
+    debugSerial->println(state_angle_shoulder);
+    debugSerial->print("E: ");
+    debugSerial->println(state_angle_elbow);
+    debugSerial->print("W: ");
+    debugSerial->println(state_angle_wrist);
+    debugSerial->print("G: ");
+    debugSerial->println(state_angle_grip);
+    debugSerial->println();
   }
 
   void attachAll()
@@ -115,9 +118,9 @@ public:
 
     if (requiredAngle == stateAngle)
     {
-      Serial.print(motorName);
-      Serial.print(" is already on angle: ");
-      Serial.println(requiredAngle);
+      debugSerial->print(motorName);
+      debugSerial->print(" is already on angle: ");
+      debugSerial->println(requiredAngle);
       return;
     }
 
@@ -168,8 +171,8 @@ public:
       return;
     }
 
-    Serial.print("Moved ");
-    Serial.println(motorName);
+    debugSerial->print("Moved ");
+    debugSerial->println(motorName);
 
     rest_and_print();
   }

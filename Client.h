@@ -1,4 +1,5 @@
-#include <AltSoftSerial.h>
+#include <HardwareSerial.h>
+#include <NeoSWSerial.h>
 
 class Client
 {
@@ -12,7 +13,9 @@ public:
   };
 
 private:
-  AltSoftSerial *serial;
+  HardwareSerial *cameraSerial;
+  NeoSWSerial *debugSerial;
+
   Status status;
   unsigned long requestTime;
   const unsigned long TIMEOUT_MS = 5000;
@@ -22,9 +25,11 @@ private:
   int valueCount;
 
 public:
-  Client(AltSoftSerial *serialPort)
+  Client(HardwareSerial *cameraSerial, NeoSWSerial *debugSerial)
   {
-    serial = serialPort;
+    this->cameraSerial = cameraSerial;
+    this->debugSerial = debugSerial;
+
     status = IDLE;
     bufferIndex = 0;
     valueCount = 0;
@@ -32,22 +37,22 @@ public:
 
   void begin(long baudRate)
   {
-    serial->begin(baudRate);
+    cameraSerial->begin(baudRate);
   }
 
   // clears buffer and sends the request ONLY, updates state to WAITING
   void sendRequest(const char *command)
   {
     // Clear any pending data
-    while (serial->available())
+    while (cameraSerial->available())
     {
-      serial->read();
+      cameraSerial->read();
     }
 
     // Send command
-    serial->println(command);
-    Serial.print("Sent: ");
-    Serial.println(command);
+    cameraSerial->println(command);
+    debugSerial->print("Sent: ");
+    debugSerial->println(command);
 
     requestTime = millis();
     status = WAITING;
@@ -63,24 +68,24 @@ public:
       if (millis() - requestTime > TIMEOUT_MS)
       {
         status = ERROR;
-        Serial.println("Response timeout");
+        debugSerial->println("Response timeout");
         return;
       }
 
-      while (serial->available() && bufferIndex < 255)
+      while (cameraSerial->available() && bufferIndex < 255)
       {
-        char c = serial->read();
+        char c = cameraSerial->read();
         if (c == '\n')
         {
           buffer[bufferIndex] = '\0';
 
-          Serial.print("Received: ");
-          Serial.println(buffer);
+          debugSerial->print("Received: ");
+          debugSerial->println(buffer);
 
           if (strncmp(buffer, "ERROR", 5) == 0)
           {
             status = ERROR;
-            Serial.println("ESP32-CAM error");
+            debugSerial->println("ESP32-CAM error");
           }
           else
           {
