@@ -1,22 +1,6 @@
 #include <Servo.h>
 #include <NeoSWSerial.h>
-
-// === Servo Pins ===
-#define SERVO_PIN_BASE 10    // Base
-#define SERVO_PIN_SHOULDER 3 // Shoulder
-#define SERVO_PIN_ELBOW 9    // Elbow
-#define SERVO_PIN_WRIST 8    // Wrist
-#define SERVO_PIN_GRIP 7     // Grip
-
-#define GRIP_CLOSED 72
-#define GRIP_OPEN 105
-
-// === Default Angles ===
-#define DEFAULT_ANGLE_BASE 90
-#define DEFAULT_ANGLE_SHOULDER 90
-#define DEFAULT_ANGLE_ELBOW 90
-#define DEFAULT_ANGLE_WRIST 90
-#define DEFAULT_ANGLE_GRIP 90
+#include "DEFs.h"
 
 class Arm
 {
@@ -47,6 +31,7 @@ public:
 
   void printMenu()
   {
+#if ENABLE_DEBUG
     debugSerial->print("B: ");
     debugSerial->println(state_angle_base);
     debugSerial->print("S: ");
@@ -58,6 +43,7 @@ public:
     debugSerial->print("G: ");
     debugSerial->println(state_angle_grip);
     debugSerial->println();
+#endif
   }
 
   void attachAll()
@@ -118,9 +104,11 @@ public:
 
     if (requiredAngle == stateAngle)
     {
+#if ENABLE_DEBUG
       debugSerial->print(motorName);
       debugSerial->print(" is already on angle: ");
       debugSerial->println(requiredAngle);
+#endif
       return;
     }
 
@@ -171,8 +159,10 @@ public:
       return;
     }
 
+#if ENABLE_DEBUG
     debugSerial->print("Moved ");
     debugSerial->println(motorName);
+#endif
 
     rest_and_print();
   }

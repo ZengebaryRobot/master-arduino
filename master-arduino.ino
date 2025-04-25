@@ -1,12 +1,9 @@
 #include <Wire.h>
-#include "Client.h"
 #include <LiquidCrystal_I2C.h>
-#include "Arm.h"
 #include <NeoSWSerial.h>
-
-#define I2C_ADDRESS_MASTER 0x10
-#define I2C_ADDRESS_LCD 0x27
-#define TEXT_ARG_SIZE 64
+#include "DEFs.h"
+#include "Client.h"
+#include "Arm.h"
 
 enum
 {
@@ -16,9 +13,21 @@ enum
   CMD_MOVE_ARM_JOINT = 4
 };
 
+#if ENABLE_DEBUG
 NeoSWSerial debugSerial(8, 9); // 8 (RX) & 9 (TX)
+#endif
+
+#if ENABLE_DEBUG
 Client camClient(&Serial, &debugSerial);
+#else
+Client camClient(&Serial, nullptr);
+#endif
+
+#if ENABLE_DEBUG
 Arm arm(&debugSerial);
+#else
+Arm arm(nullptr);
+#endif
 
 volatile bool newCommand = false;
 volatile uint8_t commandType = 0;
@@ -89,8 +98,10 @@ void requestEvent()
 
 void showOnDisplay(const String &txt)
 {
+#if ENABLE_DEBUG
   debugSerial.print("Displaying: ");
   debugSerial.println(txt);
+#endif
 
   lcd.clear();
   delay(200);
@@ -112,6 +123,7 @@ void showOnDisplay(const String &txt)
 
 void moveArmTo(int base, int shoulder, int elbow, int wrist, int grip)
 {
+#if ENABLE_DEBUG
   debugSerial.print("Moving arm to: ");
   debugSerial.print(base);
   debugSerial.print(", ");
@@ -122,6 +134,7 @@ void moveArmTo(int base, int shoulder, int elbow, int wrist, int grip)
   debugSerial.print(wrist);
   debugSerial.print(", ");
   debugSerial.println(grip);
+#endif
 }
 
 void setup()
@@ -132,8 +145,10 @@ void setup()
   lcd.backlight();
   showOnDisplay("    Zengebary       loading...");
 
+#if ENABLE_DEBUG
   debugSerial.begin(9600);
   delay(200);
+#endif
 
   camClient.begin(115200);
   delay(200);
@@ -147,7 +162,10 @@ void setup()
   Wire.onRequest(requestEvent);
 
   showOnDisplay("    Zengebary         ready");
+
+#if ENABLE_DEBUG
   debugSerial.println("Master ready");
+#endif
 }
 
 void loop()
