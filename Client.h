@@ -111,9 +111,8 @@ public:
   }
 
   // Blocking function that WAITS for response
-  int *getVisionDataBlocking(Client &client, const char *command, int *valueCount, unsigned long timeout = 3000)
+  int *getVisionDataBlocking(Client &client, const char *command, int *valueCount)
   {
-
     client.sendRequest(command);
 
     unsigned long startTime = millis();
@@ -122,7 +121,7 @@ public:
     {
       client.update();
 
-      if (millis() - startTime > timeout)
+      if (millis() - startTime > TIMEOUT_MS)
       {
         *valueCount = 0;
         return nullptr;

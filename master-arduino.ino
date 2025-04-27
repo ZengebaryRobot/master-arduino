@@ -134,11 +134,11 @@ void setup()
   delay(200);
 #endif
 
-  camClient.begin(115200);
+  camClient.begin(9600);
   delay(200);
 
   arm.initializeArm();
-  
+
   Wire.begin(I2C_ADDRESS_MASTER);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
@@ -148,7 +148,6 @@ void setup()
 #if ENABLE_DEBUG
   debugSerial.println("Master ready");
 #endif
-
 }
 
 void loop()
@@ -166,8 +165,12 @@ void loop()
     {
     case CMD_CAMERA:
     {
+#if ENABLE_DEBUG
+      debugSerial.println("Camera sent...");
+#endif
+
       int valCount;
-      int *vals = camClient.getVisionDataBlocking(camClient, textArg.c_str(), &valCount, 3000);
+      int *vals = camClient.getVisionDataBlocking(camClient, textArg.c_str(), &valCount);
       if (vals && valCount > 0)
       {
         int p = 0;
@@ -175,47 +178,83 @@ void loop()
           p += snprintf(responseBuf + p, sizeof(responseBuf) - p, "%d%s", vals[i], (i < valCount - 1 ? "," : ""));
 
         responseLen = p;
+#if ENABLE_DEBUG
+        debugSerial.println("Camera success");
+#endif
       }
       else
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
+#if ENABLE_DEBUG
+        debugSerial.println("Camera fail");
+#endif
       }
       break;
     }
 
     case CMD_DISPLAY:
+#if ENABLE_DEBUG
+      debugSerial.println("Display showing...");
+#endif
+
       if (textArg.length() > 32)
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
+#if ENABLE_DEBUG
+        debugSerial.println("Display failed");
+#endif
       }
       else
       {
         showOnDisplay(textArg);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
+#if ENABLE_DEBUG
+        debugSerial.println("Display success");
+#endif
       }
       break;
 
     case CMD_MOVE_ARM:
+#if ENABLE_DEBUG
+      debugSerial.println("Moving arm...");
+#endif
+
       if (intArgCount == 5)
       {
         arm.moveArmTo(intArgs[0], intArgs[1], intArgs[2], intArgs[3], intArgs[4]);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
+#if ENABLE_DEBUG
+        debugSerial.println("Arm moved success");
+#endif
       }
       else
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
+#if ENABLE_DEBUG
+        debugSerial.println("Arm moved failed");
+#endif
       }
       break;
 
     case CMD_MOVE_ARM_JOINT:
+#if ENABLE_DEBUG
+      debugSerial.println("Arm joint moving...");
+#endif
+
       if (intArgCount == 3)
       {
         arm.moveServo(intArgs[0], intArgs[1], intArgs[2]);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
+#if ENABLE_DEBUG
+        debugSerial.println("Arm joint moved success");
+#endif
       }
       else
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
+#if ENABLE_DEBUG
+        debugSerial.println("Arm joint moved failed");
+#endif
       }
       break;
 
