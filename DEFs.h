@@ -1,6 +1,9 @@
 // === Enable debuging on serial monitor ===
 #define ENABLE_DEBUG true
 
+// === Enable display ===
+#define ENABLE_DISPLAY true
+
 // === I2C ===
 #define I2C_ADDRESS_MASTER 0x10
 #define I2C_ADDRESS_LCD 0x27

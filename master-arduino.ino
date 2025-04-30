@@ -1,7 +1,14 @@
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-#include <NeoSWSerial.h>
 #include "DEFs.h"
+#include <Wire.h>
+
+#if ENABLE_DISPLAY
+#include <LiquidCrystal_I2C.h>
+#endif
+
+#if ENABLE_DEBUG
+#include <NeoSWSerial.h>
+#endif
+
 #include "Client.h"
 #include "Arm.h"
 
@@ -43,7 +50,9 @@ uint8_t responseLen = 0;
 volatile bool readyToReply = false;
 
 // LCD
+#if ENABLE_DISPLAY
 LiquidCrystal_I2C lcd(I2C_ADDRESS_LCD, 16, 2);
+#endif
 
 void receiveEvent(int howMany)
 {
@@ -103,6 +112,7 @@ void showOnDisplay(const String &txt)
   debugSerial.println(txt);
 #endif
 
+#if ENABLE_DISPLAY
   lcd.clear();
   delay(200);
 
@@ -119,14 +129,17 @@ void showOnDisplay(const String &txt)
   {
     lcd.print(txt);
   }
+#endif
 }
 
 void setup()
 {
   // LCD init
+#if ENABLE_DISPLAY
   lcd.init();
   lcd.clear();
   lcd.backlight();
+#endif
   showOnDisplay("    Zengebary       loading...");
 
 #if ENABLE_DEBUG
@@ -197,6 +210,7 @@ void loop()
       debugSerial.println("Display showing...");
 #endif
 
+#if ENABLE_DISPLAY
       if (textArg.length() > 32)
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
@@ -212,6 +226,12 @@ void loop()
         debugSerial.println("Display success");
 #endif
       }
+#else
+      responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
+#if ENABLE_DEBUG
+      debugSerial.println("Display disabled");
+#endif
+#endif
       break;
 
     case CMD_MOVE_ARM:
