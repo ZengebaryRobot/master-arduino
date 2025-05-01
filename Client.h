@@ -20,7 +20,7 @@ private:
   const unsigned long TIMEOUT_MS = 5000;
   char buffer[256];
   int bufferIndex;
-  int values[20]; // i assume max val is 20
+  int values[30];
   int valueCount;
 
 public:
@@ -174,7 +174,7 @@ private:
     tempBuffer[sizeof(tempBuffer) - 1] = '\0';
 
     char *token = strtok(tempBuffer, ",");
-    while (token && valueCount < 20)
+    while (token && valueCount < 30)
     {
       values[valueCount++] = atoi(token);
       token = strtok(NULL, ",");
