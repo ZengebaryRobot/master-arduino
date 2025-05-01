@@ -1,5 +1,4 @@
 #include <Servo.h>
-#include <NeoSWSerial.h>
 #include "DEFs.h"
 
 enum ArmMotor {
@@ -12,35 +11,35 @@ enum ArmMotor {
 
 class Arm {
 private:
-  NeoSWSerial *debugSerial;
   Servo servoBase, servoShoulder, servoElbow, servoWrist, servoGrip;
 
   // Current angles
   int state_angle_base, state_angle_shoulder, state_angle_elbow, state_angle_wrist, state_angle_grip;
 
   void printMessage(const char *msg, bool newLine = false) {
-#if ENABLE_DEBUG
-    if (newLine) {
-      debugSerial->println(msg);
-    } else {
-      debugSerial->print(msg);
-    }
-#endif
+    #if ENABLE_DEBUG
+      if (newLine) {
+        Serial.println(msg);
+      } else {
+        Serial.print(msg);
+      }
+    #endif
   }
 
   void printMenu() {
-#if ENABLE_DEBUG
-    debugSerial->print("B: ");
-    debugSerial->println(state_angle_base);
-    debugSerial->print("S: ");
-    debugSerial->println(state_angle_shoulder);
-    debugSerial->print("E: ");
-    debugSerial->println(state_angle_elbow);
-    debugSerial->print("W: ");
-    debugSerial->println(state_angle_wrist);
-    debugSerial->print("G: ");
-    debugSerial->println(state_angle_grip);
-#endif
+    #if ENABLE_DEBUG
+  Serial.print("B: ");
+  Serial.println(state_angle_base);
+  Serial.print("S: ");
+  Serial.println(state_angle_shoulder);
+  Serial.print("E: ");
+  Serial.println(state_angle_elbow);
+  Serial.print("W: ");
+  Serial.println(state_angle_wrist);
+  Serial.print("G: ");
+  Serial.println(state_angle_grip);
+  Serial.println();
+  #endif
   }
 
   void attachAll() {
@@ -51,8 +50,7 @@ private:
     servoGrip.attach(SERVO_PIN_GRIP, 500, 2400);  // 1000 - 2000 ?? REVIEW
   }
 public:
-  Arm(NeoSWSerial *serial) {
-    debugSerial = serial;
+  Arm() {
   }
 
   void initializeArm() {
@@ -119,12 +117,12 @@ public:
         return;
     }
 
-    // if (requiredAngle == *stateAngle) {
-    //   printMessage(motorName);
-    //   printMessage(" is already on angle: ");
-    //   printMessage(requiredAngle, true);
-    //   return;
-    // }
+    if (requiredAngle == *stateAngle) {
+      printMessage(motorName);
+      printMessage(" is already on angle: ");
+      printMessage(requiredAngle, true);
+      return;
+    }
 
     // Move to target angle
     int step = (requiredAngle > *stateAngle) ? 1 : -1;
@@ -132,9 +130,6 @@ public:
       int remaining = abs(requiredAngle - i);
       int delayMs = (remaining > threshold) ? baseDelay : slowDelay;
       s->write(i);
-#if ENABLE_DEBUG
-      debugSerial->println(i);
-#endif
       delay(delayMs);
     }
 

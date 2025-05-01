@@ -20,21 +20,17 @@ enum
   CMD_MOVE_ARM_JOINT = 4
 };
 
-#if ENABLE_DEBUG
-NeoSWSerial debugSerial(10, 11); // 10 (RX) & 11 (TX)
-#endif
+// #if ENABLE_DEBUG
+// NeoSWSerial debugSerial(10, 11); // 10 (RX) & 11 (TX)
+// #endif
 
-#if ENABLE_DEBUG
-Client camClient(&Serial, &debugSerial);
-#else
-Client camClient(&Serial, nullptr);
-#endif
-
-#if ENABLE_DEBUG
-Arm arm(&debugSerial);
-#else
-Arm arm(nullptr);
-#endif
+// #if ENABLE_DEBUG
+// Client camClient(&Serial, &debugSerial);
+// #else
+// Client camClient(&Serial, nullptr);
+// #endif
+Client camClient(&Serial);
+Arm arm;
 
 volatile bool newCommand = false;
 volatile uint8_t commandType = 0;
@@ -109,7 +105,7 @@ void showOnDisplay(const String &txt)
 {
 #if ENABLE_DEBUG
   debugSerial.print("Displaying: ");
-  debugSerial.println(txt);
+  Serial.println(txt);
 #endif
 
 #if ENABLE_DISPLAY
@@ -134,7 +130,11 @@ void showOnDisplay(const String &txt)
 
 void setup()
 {
-  // LCD init
+
+  Wire.begin(I2C_ADDRESS_MASTER);
+  Wire.onReceive(receiveEvent);
+  Wire.onRequest(requestEvent);
+  //LCD init
 #if ENABLE_DISPLAY
   lcd.init();
   lcd.clear();
@@ -142,25 +142,26 @@ void setup()
 #endif
   showOnDisplay("    Zengebary       loading...");
 
-#if ENABLE_DEBUG
-  debugSerial.begin(9600);
-  delay(200);
-#endif
+// #if ENABLE_DEBUG
+//   debugSerial.begin(9600);
+//   delay(200);
+// #endif
 
   camClient.begin(9600);
   delay(200);
 
+  // Serial.begin(9600);
+  // while (!Serial) {
+  //   ;
+  // }  // wait for serial port to connect (for Leonardo, etc.)
+
   arm.initializeArm();
-
-  Wire.begin(I2C_ADDRESS_MASTER);
-  Wire.onReceive(receiveEvent);
-  Wire.onRequest(requestEvent);
-
+  Serial.println("Write mode Servo Calibration Initialized.");
   showOnDisplay("    Zengebary         ready");
 
-#if ENABLE_DEBUG
-  debugSerial.println("Master ready");
-#endif
+  #if ENABLE_DEBUG
+    Serial.println("Master ready");
+  #endif
 }
 
 void loop()
@@ -179,7 +180,7 @@ void loop()
     case CMD_CAMERA:
     {
 #if ENABLE_DEBUG
-      debugSerial.println("Camera sent...");
+      Serial.println("Camera sent...");
 #endif
 
       int valCount;
@@ -192,14 +193,14 @@ void loop()
 
         responseLen = p;
 #if ENABLE_DEBUG
-        debugSerial.println("Camera success");
+        Serial.println("Camera success");
 #endif
       }
       else
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
 #if ENABLE_DEBUG
-        debugSerial.println("Camera fail");
+        Serial.println("Camera fail");
 #endif
       }
       break;
@@ -207,7 +208,7 @@ void loop()
 
     case CMD_DISPLAY:
 #if ENABLE_DEBUG
-      debugSerial.println("Display showing...");
+      Serial.println("Display showing...");
 #endif
 
 #if ENABLE_DISPLAY
@@ -215,7 +216,7 @@ void loop()
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
 #if ENABLE_DEBUG
-        debugSerial.println("Display failed");
+        Serial.println("Display failed");
 #endif
       }
       else
@@ -223,20 +224,20 @@ void loop()
         showOnDisplay(textArg);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
 #if ENABLE_DEBUG
-        debugSerial.println("Display success");
+        Serial.println("Display success");
 #endif
       }
 #else
       responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
 #if ENABLE_DEBUG
-      debugSerial.println("Display disabled");
+      Serial.println("Display disabled");
 #endif
 #endif
       break;
 
     case CMD_MOVE_ARM:
 #if ENABLE_DEBUG
-      debugSerial.println("Moving arm...");
+      Serial.println("Moving arm...");
 #endif
 
       if (intArgCount == 5)
@@ -244,21 +245,21 @@ void loop()
         arm.moveArmTo(intArgs[0], intArgs[1], intArgs[2], intArgs[3], intArgs[4]);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
 #if ENABLE_DEBUG
-        debugSerial.println("Arm moved success");
+        Serial.println("Arm moved success");
 #endif
       }
       else
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
 #if ENABLE_DEBUG
-        debugSerial.println("Arm moved failed");
+        Serial.println("Arm moved failed");
 #endif
       }
       break;
 
     case CMD_MOVE_ARM_JOINT:
 #if ENABLE_DEBUG
-      debugSerial.println("Arm joint moving...");
+      Serial.println("Arm joint moving...");
 #endif
 
       if (intArgCount == 3)
@@ -266,14 +267,14 @@ void loop()
         arm.moveServo(intArgs[0], intArgs[1], intArgs[2]);
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "OK");
 #if ENABLE_DEBUG
-        debugSerial.println("Arm joint moved success");
+        Serial.println("Arm joint moved success");
 #endif
       }
       else
       {
         responseLen = snprintf(responseBuf, sizeof(responseBuf), "ERROR");
 #if ENABLE_DEBUG
-        debugSerial.println("Arm joint moved failed");
+        Serial.println("Arm joint moved failed");
 #endif
       }
       break;

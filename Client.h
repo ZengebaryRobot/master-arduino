@@ -15,7 +15,7 @@ public:
 
 private:
   HardwareSerial *cameraSerial;
-  NeoSWSerial *debugSerial;
+  //NeoSWSerial *debugSerial;
 
   Status status;
   unsigned long requestTime;
@@ -26,10 +26,10 @@ private:
   int valueCount;
 
 public:
-  Client(HardwareSerial *cameraSerial, NeoSWSerial *debugSerial)
+  Client(HardwareSerial *cameraSerial)
   {
     this->cameraSerial = cameraSerial;
-    this->debugSerial = debugSerial;
+    //this->debugSerial = debugSerial;
 
     status = IDLE;
     bufferIndex = 0;
@@ -54,8 +54,8 @@ public:
     cameraSerial->println(command);
 
 #if ENABLE_DEBUG
-    debugSerial->print("Sent: ");
-    debugSerial->println(command);
+    Serial.print("Sent: ");
+    Serial.println(command);
 #endif
 
     requestTime = millis();
@@ -73,7 +73,7 @@ public:
       {
         status = ERROR;
 #if ENABLE_DEBUG
-        debugSerial->println("Response timeout");
+        Serial.println("Response timeout");
 #endif
         return;
       }
@@ -86,8 +86,8 @@ public:
           buffer[bufferIndex] = '\0';
 
 #if ENABLE_DEBUG
-          debugSerial->print("Received: ");
-          debugSerial->println(buffer);
+          Serial.print("Received: ");
+          Serial.println(buffer);
 #endif
 
           if (strncmp(buffer, "ERROR", 5) == 0)
@@ -95,7 +95,7 @@ public:
             status = ERROR;
 
 #if ENABLE_DEBUG
-            debugSerial->println("ESP32-CAM error");
+            Serial.println("ESP32-CAM error");
 #endif
           }
           else

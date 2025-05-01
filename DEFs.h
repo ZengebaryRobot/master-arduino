@@ -1,8 +1,8 @@
 // === Enable debuging on serial monitor ===
-#define ENABLE_DEBUG true
+#define ENABLE_DEBUG false
 
 // === Enable display ===
-#define ENABLE_DISPLAY true
+#define ENABLE_DISPLAY false
 
 // === I2C ===
 #define I2C_ADDRESS_MASTER 0x10
@@ -10,7 +10,7 @@
 #define TEXT_ARG_SIZE 64
 
 // === Servo Pins ===
-#define SERVO_PIN_BASE 10    // Base
+#define SERVO_PIN_BASE 6     // Base
 #define SERVO_PIN_SHOULDER 3 // Shoulder
 #define SERVO_PIN_ELBOW 9    // Elbow
 #define SERVO_PIN_WRIST 8    // Wrist
