@@ -1,6 +1,3 @@
-// === Enable debuging on serial monitor ===
-#define ENABLE_DEBUG false
-
 // === Enable display ===
 #define ENABLE_DISPLAY false
 

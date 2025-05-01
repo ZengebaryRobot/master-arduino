@@ -1,5 +1,4 @@
 #include <HardwareSerial.h>
-#include <NeoSWSerial.h>
 #include "DEFs.h"
 
 class Client
@@ -15,7 +14,6 @@ public:
 
 private:
   HardwareSerial *cameraSerial;
-  //NeoSWSerial *debugSerial;
 
   Status status;
   unsigned long requestTime;
@@ -29,7 +27,6 @@ public:
   Client(HardwareSerial *cameraSerial)
   {
     this->cameraSerial = cameraSerial;
-    //this->debugSerial = debugSerial;
 
     status = IDLE;
     bufferIndex = 0;
@@ -53,11 +50,6 @@ public:
     // Send command
     cameraSerial->println(command);
 
-#if ENABLE_DEBUG
-    Serial.print("Sent: ");
-    Serial.println(command);
-#endif
-
     requestTime = millis();
     status = WAITING;
     bufferIndex = 0;
@@ -72,9 +64,6 @@ public:
       if (millis() - requestTime > TIMEOUT_MS)
       {
         status = ERROR;
-#if ENABLE_DEBUG
-        Serial.println("Response timeout");
-#endif
         return;
       }
 
@@ -85,18 +74,9 @@ public:
         {
           buffer[bufferIndex] = '\0';
 
-#if ENABLE_DEBUG
-          Serial.print("Received: ");
-          Serial.println(buffer);
-#endif
-
           if (strncmp(buffer, "ERROR", 5) == 0)
           {
             status = ERROR;
-
-#if ENABLE_DEBUG
-            Serial.println("ESP32-CAM error");
-#endif
           }
           else
           {
