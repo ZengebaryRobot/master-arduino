@@ -1,10 +1,5 @@
-// === Enable display ===
-#define ENABLE_DISPLAY false
-
-// === I2C ===
-#define I2C_ADDRESS_MASTER 0x10
-#define I2C_ADDRESS_LCD 0x27
-#define TEXT_ARG_SIZE 64
+// === Debugging ===
+#define ENABLE_DEBUG 0
 
 // === Servo Pins ===
 #define SERVO_PIN_BASE 6     // Base
@@ -22,3 +17,6 @@
 #define DEFAULT_ANGLE_ELBOW 90
 #define DEFAULT_ANGLE_WRIST 90
 #define DEFAULT_ANGLE_GRIP 90
+
+// === Steppers ===
+#define STEPPER_COUNT 10

@@ -20,10 +20,33 @@ private:
 
   void printMessage(const char *msg, bool newLine = false)
   {
+#if ENABLE_DEBUG
+    if (newLine)
+    {
+      Serial.println(msg);
+    }
+    else
+    {
+      Serial.print(msg);
+    }
+#endif
   }
 
   void printMenu()
   {
+#if ENABLE_DEBUG
+    Serial.print("B: ");
+    Serial.println(state_angle_base);
+    Serial.print("S: ");
+    Serial.println(state_angle_shoulder);
+    Serial.print("E: ");
+    Serial.println(state_angle_elbow);
+    Serial.print("W: ");
+    Serial.println(state_angle_wrist);
+    Serial.print("G: ");
+    Serial.println(state_angle_grip);
+    Serial.println();
+#endif
   }
 
   void attachAll()
