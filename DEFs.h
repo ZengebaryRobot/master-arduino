@@ -20,3 +20,20 @@
 
 // === Steppers ===
 #define STEPPER_COUNT 10
+
+#define STEP_PIN_1 A0
+#define DIR_PIN_1  A1
+
+#define STEP_PIN_2 A2
+#define DIR_PIN_2  A3
+
+#define STEP_PIN_3 A4
+#define DIR_PIN_3  A5
+
+#define STEP_PIN_4 12
+#define DIR_PIN_4  13
+
+#define STEP_PIN_5 7
+#define DIR_PIN_5 8
+
+#define STEPPER_DELAY 1000  
