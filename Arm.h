@@ -149,18 +149,19 @@ public:
     }
 
     // Applying overshoot
-    if (overShoot > 0)
-    {
-      for (int i = requiredAngle; i <= requiredAngle + overShoot; i++)
-      {
-        s->write(i);
-        delay(baseDelay);
-      }
-      for (int i = requiredAngle + overShoot; i >= requiredAngle; i--)
-      {
-        s->write(i);
-        delay(baseDelay);
-      }
+    int end = requiredAngle + overShoot;
+    int step = (overShoot >= 0) ? 1 : -1;
+    
+    // Move to overshoot position
+    for (int i = requiredAngle; i != end + step; i += step) {
+      s->write(i);
+      delay(baseDelay);
+    }
+    
+    // Move back to requiredAngle
+    for (int i = end; i != requiredAngle - step; i -= step) {
+      s->write(i);
+      delay(baseDelay);
     }
 
     // Update state and print if angle changed
