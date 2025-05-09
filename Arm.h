@@ -89,7 +89,15 @@ public:
     requiredAngle = constrain(requiredAngle, 10, 170);
 
     // Motor-specific settings
-    int baseDelay = 40, slowDelay = 80, threshold = 0;
+    int normalDelay = 40, slowDelay = 80, threshold = 0;
+
+
+    int baseDelay = 30;
+    int shoulderDelay = 20;
+    int shoulderSlowDelay = 35;
+    int currDelay = normalDelay;
+    int currSlowDelay = slowDelay;
+
     const char *motorName = "";
     Servo *s = nullptr;
     int *stateAngle = nullptr;
@@ -97,31 +105,29 @@ public:
     switch (motor)
     {
     case BASE:
-      threshold = 20;
       motorName = "base";
       s = &servoBase;
+      currDelay = baseDelay;
       stateAngle = &state_angle_base;
       break;
     case SHOULDER:
-      threshold = 0;
       motorName = "shoulder";
-      s = &servoShoulder;
       stateAngle = &state_angle_shoulder;
+      s = &servoShoulder;
+      currDelay = shoulderDelay;
+      currSlowDelay = shoulderSlowDelay;
       break;
     case ELBOW:
-      threshold = 5;
       motorName = "elbow";
       s = &servoElbow;
       stateAngle = &state_angle_elbow;
       break;
     case WRIST:
-      threshold = 0;
       motorName = "wrist";
       s = &servoWrist;
       stateAngle = &state_angle_wrist;
       break;
     case GRIP:
-      threshold = 0;
       motorName = "grip";
       s = &servoGrip;
       stateAngle = &state_angle_grip;
@@ -139,31 +145,33 @@ public:
     }
 
     // Move to target angle
+
+
+    
     int step = (requiredAngle > *stateAngle) ? 1 : -1;
     for (int i = *stateAngle; i != requiredAngle + step; i += step)
     {
       int remaining = abs(requiredAngle - i);
-      int delayMs = (remaining > threshold) ? baseDelay : slowDelay;
+      int delayMs = (remaining > threshold) ? currDelay : currSlowDelay;
       s->write(i);
       delay(delayMs);
     }
 
     // Applying overshoot
     int end = requiredAngle + overShoot;
-    int step = (overShoot >= 0) ? 1 : -1;
-    
-    // Move to overshoot position
-    for (int i = requiredAngle; i != end + step; i += step) {
-      s->write(i);
-      delay(baseDelay);
+    if(step == 1){
+      // Move to overshoot position
+      for (int i = requiredAngle; i != end + step; i += step) {
+        s->write(i);
+        delay(normalDelay);
+      }
+      
+      // Move back to requiredAngle
+      for (int i = end; i != requiredAngle - step; i -= step) {
+        s->write(i);
+        delay(normalDelay);
+      }
     }
-    
-    // Move back to requiredAngle
-    for (int i = end; i != requiredAngle - step; i -= step) {
-      s->write(i);
-      delay(baseDelay);
-    }
-
     // Update state and print if angle changed
     *stateAngle = requiredAngle;
 
@@ -174,8 +182,4 @@ public:
     delay(500);
   }
 
-  void moveArmTo(int base, int shoulder, int elbow, int wrist, int grip)
-  {
-    // to be implemented
-  }
 };
