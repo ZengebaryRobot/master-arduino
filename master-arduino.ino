@@ -17,9 +17,6 @@ NeoSWSerial debugSerial(10, 11); // 10 (RX) & 11 (TX)
 
 void setup()
 {
-  delay(700);
-  pinMode(ESP_ENABLE, OUTPUT);
-  digitalWrite(ESP_ENABLE, LOW);
 
   espSerial.begin(9600);
   delay(200);
